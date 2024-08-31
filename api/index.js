@@ -11,12 +11,13 @@ const port = 3000;
 const salt = bcrypt.genSaltSync(10);
 const secret = 'adfgafgafdggregwgwrgwgrwggfvvmk';
 
-app.use(cors());
+app.use(cors({credentials:true, origin:'http://localhost:5173'}));
 app.use(express.json());
 
 mongoose.connect(
   "mongodb+srv://blog:4Mdix4lTqfKw92FT@cluster0.6go5x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 );
+
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
@@ -31,6 +32,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
+
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const userDoc = await User.findOne({username});
@@ -38,12 +40,13 @@ app.post("/login", async (req, res) => {
   if(passOk) {
     jwt.sign({username,id:userDoc.id}, secret , {}, (err, token) => {
       if (err) throw err;
-      res.json(token)
+      res.cookie('token',token).json('ok')
     } )
   }else {
     res.status(400).json('Wrong Credentials')
   }
 });
+
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
